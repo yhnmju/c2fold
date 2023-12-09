@@ -2,13 +2,13 @@
 
 ## About
 
-I wrote this utility because I had lost my collection of music on my computer when I had two hard disk drive loses in short succession.
-Unfortunately my collection of cd's were out of the house in storage (moving house). I didn't want to collect and unbox these
-as I would soon have to send them offsite again.
-So instead I wrote c2f so that I could download these as a replacement from cloud, convert from mp4 to mp3 and add id3 tags.
+I wrote this utility because I had lost my collection of music on my computer when I had two disk drive loses in short succession.
+
+Unfortunately, my collection of cd's were out of the house in storage (moving house). I didn't want to collect and upbox these as I would soon have to send them offsite again.
+So instead, I wrote c2f so that I could download these as a replacement from cloud, convert from mp4 to mp3 and add id3 tags.
 
 c2f is a utility to download videos and convert them to mp3 or ogg files.
-It identfiies the song and album, using a combination songrec (Shazam client) and Musicbrainz (additional information), and updates the audio file with metadata (id3).
+It identfiies the song and album, using a combination of songrec (Shazam client) and Musicbrainz (additional information), and updates the audio file with metadata (id3).
 It then uses the metadata to update the name of the audio file.
 
 ## TODO
@@ -46,7 +46,8 @@ Loads.
 
 4. Download music into mp3 file;
 
-       $ download.py
+       $ download.py example
+       downloading 3
 
 5. Update id3 metadata in mp3 file;
 
@@ -54,5 +55,5 @@ Loads.
 
 6. Lastily, rename file based on metadata contained in mp3 file and move location;
 
-       $ renamefile.py
+       $ renamefile.py MySong.mp3
    

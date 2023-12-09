@@ -38,7 +38,6 @@ def UtilConfig(configFile):
 #    print("Opening", configFile)
     try:
         with open(configFile) as fd:
-            print("fd is", fd)
             for l in fd:
                 line = l.rstrip("\r\n")
                 s = line.split("=")
@@ -60,7 +59,6 @@ def EncodeMetadata(song):
     id3['TPE1'] = TPE1(encoding=3, text=song.Artist)
     id3['TCON'] = TCON(encoding=3, text=song.Genre)
     id3['TYER'] = TYER(encoding=3, text=year)
-#    print("DEBUG1: position is", position)
     id3['TRCK'] = TRCK(encoding=3, text=position)
     id3.save(song.file())
 
@@ -100,8 +98,8 @@ def processFiles():
             if(song in szSong.keys()):
                 szSong[song].setPosition(mbSong[song].getPosition())
                 if(artist in config['Artist']):
+                    print(f, "album is", album, "and", sys.argv[1], "is", config['Album'])
                     if(album in config['Album']):
-                        print("Album is", config['Album'])
                         EncodeMetadata(szSong[song])
 
 def getTracklist(artist, album):
