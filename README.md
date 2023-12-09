@@ -31,15 +31,21 @@ Loads.
 
 2. Create HOME/.config/c2f.cfg and place "songrec=pathto_songrec_here"
    example;
+
        $ cat /home/example/.config/c2f/c2f.cfg
        songrec=/home/example/.cargo/bin/songrec
 
 3. Create a file an album you would like to download music for;
+
        $ cat example
        Artist;Smashing Pumpkins
+
        Album;Siamese Dream
+
        Genre;grunge
+
        3;https://www.youtube.com/watch?v=dxaK0xH9QUE
+
 
 4. Download music into mp3 file;
        $ download.py
