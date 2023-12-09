@@ -29,7 +29,7 @@ Loads.
 ## How do I use this?
 1. Download and installl songrec (open source Shazam client)
 
-2. Create $HOME/.config/c2f.cfg and place "songrec=pathto_songrec_here"
+2. Create HOME/.config/c2f.cfg and place "songrec=pathto_songrec_here"
    example;
        $ cat /home/example/.config/c2f/c2f.cfg
        songrec=/home/example/.cargo/bin/songrec
@@ -48,5 +48,5 @@ Loads.
       $ updatemeta_rewrite.py example
 
 6. Lastily, rename file based on metadata contained in mp3 file and move location
-
+     $ renamefile.py
    
