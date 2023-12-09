@@ -48,11 +48,11 @@ Loads.
 
        $ download.py
 
-5. Update id3 metadata in mp3 file
+5. Update id3 metadata in mp3 file;
 
-      $ updatemeta_rewrite.py example
+       $ updatemeta_rewrite.py example
 
-6. Lastily, rename file based on metadata contained in mp3 file and move location
+6. Lastily, rename file based on metadata contained in mp3 file and move location;
 
-     $ renamefile.py
+       $ renamefile.py
    
