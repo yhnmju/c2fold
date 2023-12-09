@@ -39,20 +39,20 @@ Loads.
 
        $ cat example
        Artist;Smashing Pumpkins
-
        Album;Siamese Dream
-
        Genre;grunge
-
        3;https://www.youtube.com/watch?v=dxaK0xH9QUE
 
 
 4. Download music into mp3 file;
+
        $ download.py
 
 5. Update id3 metadata in mp3 file
+
       $ updatemeta_rewrite.py example
 
 6. Lastily, rename file based on metadata contained in mp3 file and move location
+
      $ renamefile.py
    
