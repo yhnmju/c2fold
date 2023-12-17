@@ -56,4 +56,12 @@ Loads.
 7. Lastily, rename file based on metadata contained in mp3 file and move location;
 
        $ renamefile.py MySong.mp3
+       
+       $ ls -R The\ Smashing\ Pumpkins/
+       'The Smashing Pumpkins/':
+       'Siamese Dream'
+
+       'The Smashing Pumpkins/Siamese Dream':
+       Track_10.mp3  Track_13.mp3  Track_2.mp3  Track_4.mp3  Track_6.mp3  Track_8.mp3
+       Track_12.mp3  Track_1.mp3   Track_3.mp3  Track_5.mp3  Track_7.mp3  Track_9.mp3
    
