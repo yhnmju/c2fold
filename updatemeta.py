@@ -2,13 +2,14 @@
 
 import json, subprocess, glob, musicbrainzngs
 import subprocess, argparse, os, glob, sys, json, getopt, requests
-import mbzMusic, shzMusic, eyed3
-from mutagen.id3 import ID3, TCON, TCOP, TIT2, TALB, TPE1, TDRC, TRCK, TYER
+import mbzMusic, shzMusic
+from mutagen.id3 import ID3, APIC, TCON, TCOP, TIT2, TALB, TPE1, TDRC, TRCK, TYER
+from mutagen.mp3 import MP3
 from pathlib import Path
 
 musicbrainzngs.set_useragent(
     "c2f",
-    "0.1",
+    "1.1",
     "https://github.com/yhnmju/c2f/",
 )
 
@@ -22,10 +23,10 @@ exe = {}
 def readConfig(file):
     with open(file) as fd:
         for line in fd:
-            line.strip("\n")
-            line.strip("\r")
-            aaa = line.rstrip("\r\n")
-            c = aaa.split(';')
+            line = line.strip("\n")
+            line = line.strip("\r")
+#            aaa = line.rstrip("\r\n")
+            c = line.split(';')
             if (c[0] == 'Album'):
                 config['Album'] = c[1]
             elif (c[0] == 'Artist'):
@@ -34,8 +35,7 @@ def readConfig(file):
                 config['Genre'] = c[1]
 
 def UtilConfig(configFile):
-    p = {}
-#    print("Opening", configFile)
+#    p = {}
     try:
         with open(configFile) as fd:
             for l in fd:
@@ -45,26 +45,52 @@ def UtilConfig(configFile):
     except:
         print("Failed reading file", configFile)
 
-def EncodeMetadata(song):
-  #  file = open("temp.jpg", "wb")
-  #  file.write(r.content)
-  #  file.close
-#    print("EncodeMetadata song is", song.Title(), "and file is", song.GetFile())
-    filename = song.GetFile()
-    id3 = ID3(filename)
-    title       = song.Title()
-    album       = song.Album
-    artist      = song.Artist
-    position    = song.Position()
-#    print("debug: position is", position)
-    year        = szAlbum[album].Year
-    id3['TALB'] = TALB(encoding=3, text=album)
-    id3['TIT2'] = TIT2(encoding=3, text=title)
-    id3['TPE1'] = TPE1(encoding=3, text=song.Artist)
-    id3['TCON'] = TCON(encoding=3, text=song.Genre)
-    id3['TYER'] = TYER(encoding=3, text=year)
-    id3['TRCK'] = TRCK(encoding=3, text=position)
-    id3.save(song.file())
+def EncodeMetadata():
+    for s in szSong:
+        file = szSong[s].GetFile()
+        title = szSong[s].Title()
+        album = szSong[s].Album
+        AlbumIndex = s2i(album)
+        artist = szSong[s].Artist
+        position = szSong[s].Position()
+        filebg = mbSong[s].getBgImage()
+        year  = szAlbum[AlbumIndex].Year
+        genre = szAlbum[AlbumIndex].Genre
+
+        print("debug3: album="+album, "Artist="+artist, "title="+title, "genre="+genre, "year="+year, "song position="+position)
+
+        r = requests.get(filebg)
+        bgfile = open("cover.jpg", "wb")
+        bgfile.write(r.content)
+        bgfile.close()
+
+
+        id3 = ID3(file)
+        id3['TALB'] = TALB(encoding=3, text=album)
+        id3['TIT2'] = TIT2(encoding=3, text=title)
+        id3['TPE1'] = TPE1(encoding=3, text=artist)
+        id3['TCON'] = TCON(encoding=3, text=genre)
+        id3['TYER'] = TYER(encoding=3, text=year)
+        id3['TRCK'] = TRCK(encoding=3, text=position)
+
+
+        with open('cover.jpg', 'rb') as albumart:
+       #     print(albumart.read())
+            id3['APIC'] = APIC(
+                encoding=3,
+                mime='image/jpeg',
+                type=3, desc=u'Cover',
+                data=albumart.read()
+            )
+        id3.save(file)
+
+
+def s2i(stringname):
+    stringname = stringname.lower()
+    stringname = stringname.replace('’', '')
+    stringname = stringname.replace("'", '')
+#    stringname = stringname.replace(" ", '')
+    return(stringname)
 
 def processFiles():
     mbResults = getTracklist(config['Artist'], config['Album'])
@@ -79,10 +105,13 @@ def processFiles():
     # This is so we have a list of songs (and their attributes) that should be on an album
     for a in mbResults:
         mb = mbzMusic.Song(a['recording']['title'], config['Album'], config['Artist'], a['position'], a['recording']['length'])
-        mbSong[mb.getTitle()] = mb
+        s = mb.getTitle()
+        s = s2i(s)
+        mbSong[s] = mb
 
     # Loop over all mp3 files in CWD, and then use Shazam (songrec) to check the
     # attributes of the song
+    position = 0
     for f in glob.iglob('*.mp3'):
         exec = [ songrecexe, 'audio-file-to-recognized-song', f ]
         p = subprocess.check_output(exec, shell=False)
@@ -91,24 +120,22 @@ def processFiles():
         bgimage    = shazamDS['track']['images']['coverarthq']
         artist     = shazamDS['track']['subtitle']
         songtitle  = shazamDS['track']['title']
-#        print("debug: songtitle found is", songtitle)
-#        print("debug: when looking for searches", shazamDS['track']['sections'][0])
         if(len(shazamDS['track']['sections'][0]['metadata']) > 0):
             album      = shazamDS['track']['sections'][0]['metadata'][0]['text']
             year       = shazamDS['track']['sections'][0]['metadata'][2]['text']
-#            print("debug: album is", album, "and year is", year)
-            if (album not in szAlbum):
-                szAlbum[album] = shzMusic.Album(album, artist, genre, year)
+            albumIndex = s2i(album)
+            if (albumIndex not in szAlbum):
+                szAlbum[albumIndex] = shzMusic.Album(album, artist, genre, year)
 
-            szSong[songtitle] = shzMusic.Song(songtitle, album, artist, genre, f)
-        for song in mbSong:
-            if(song in szSong.keys()):
-               # szSong[song].setPosition(mbSong[song].getPosition())
-                if(artist in config['Artist']):
-                    if(album in config['Album']):
-                        print(f, "album is", album, "and", sys.argv[1], "is", config['Album'])
-                        szSong[song].setPosition(mbSong[song].getPosition())
-                        EncodeMetadata(szSong[song])
+            songtitleindex = s2i(songtitle)
+            if(songtitleindex in mbSong.keys()):
+                position = mbSong[songtitleindex].getPosition()
+                mbSong[songtitleindex].setBgImage(bgimage)
+                szSong[songtitleindex] = shzMusic.Song(songtitle, album, artist, genre, f)
+                szSong[songtitleindex].setPosition(position)
+
+
+#    return(szSong)
 
 def getTracklist(artist, album):
     result = musicbrainzngs.search_releases(artist=artist, release=album)
@@ -121,6 +148,7 @@ if(__name__ == "__main__"):
     try:
         readConfig(sys.argv[1])
         processFiles()
-   #     EncodeMetadata()
+#        print("s is", s)
+        EncodeMetadata()
     except (KeyboardInterrupt, EOFError):
         print("\nExiting...")

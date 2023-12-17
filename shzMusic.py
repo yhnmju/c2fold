@@ -10,7 +10,13 @@ class Song:
         return(self.Songtitle)
 
     def Album(self):
-        return(self.Album)
+    #    return(self.Album)
+        album = self.Album
+        return(album)
+
+    def Artist(self):
+        artist = self.Artist
+        return(artist)
 
     def setBgImage(self, file):
         self.bgimage = file
