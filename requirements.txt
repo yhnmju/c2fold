@@ -1,5 +1,4 @@
 json
 subprocess
-glob
 musicbrainzngs
 mutagen
