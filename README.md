@@ -23,9 +23,10 @@ Loads.
 
 
 ## How do I use this?
-1. Download and installl songrec (open source Shazam client), which in turn depends on having the Rust programming language installed.
+1. Download and install songrec (open source Shazam client), which in turn depends on having the Rust programming language installed.
 
-2. Install python and the Musicbrainz python library.
+2. Install c2f with pip. 
+   $ python -m pip install c2f
 
 3. Create HOME/.config/c2f.cfg and place "songrec=pathto_songrec_here"
    example;
