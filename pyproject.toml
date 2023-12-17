@@ -1,0 +1,18 @@
+[project]
+name = "c2f"
+version = "1.1.6"
+authors = [
+  { name="Sean Hall", email="usual.bowl3641@example.com" },
+]
+description = "Recovery lost music"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/yhnmju/c2f"
+Issues = "https://github.com/yhnmju/c2f/issues"
