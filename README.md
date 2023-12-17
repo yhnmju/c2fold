@@ -27,7 +27,7 @@ Loads.
 
 2. Install c2f with pip;
 
-   $ python -m pip install c2f
+       $ python -m pip install c2f
 
 3. Create HOME/.config/c2f.cfg and place "songrec=pathto_songrec_here"
    example;
