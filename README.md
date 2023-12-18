@@ -17,17 +17,18 @@ It then uses the metadata within the mp3 file to update the name of the audio fi
 ## TODO
 Loads.
 * Documentation on how to configure and run this
+* Rewrite the songrec portion in python to make it portable.
 * There is no error handling
+* Somewhat annoyingly, someone has sometimes used alternative unicode characters in the musicbrainz database. Need a workaround.
+* Hard coded CD format in code currently. This should be a option in download file.
 * Support for ogg files
 * More to come
 
 
 ## How do I use this?
-1. Download and install songrec (open source Shazam client), which in turn depends on having the Rust programming language installed.
+1. Download and installl songrec (open source Shazam client), which in turn depends on having the Rust programming language installed.
 
-2. Install c2f with pip;
-
-       $ python -m pip install c2f
+2. Install python and the Musicbrainz python library.
 
 3. Create HOME/.config/c2f.cfg and place "songrec=pathto_songrec_here"
    example;
@@ -58,12 +59,4 @@ Loads.
 7. Lastily, rename file based on metadata contained in mp3 file and move location;
 
        $ renamefile.py MySong.mp3
-       
-       $ ls -R The\ Smashing\ Pumpkins/
-       'The Smashing Pumpkins/':
-       'Siamese Dream'
-
-       'The Smashing Pumpkins/Siamese Dream':
-       Track_10.mp3  Track_13.mp3  Track_2.mp3  Track_4.mp3  Track_6.mp3  Track_8.mp3
-       Track_12.mp3  Track_1.mp3   Track_3.mp3  Track_5.mp3  Track_7.mp3  Track_9.mp3
    

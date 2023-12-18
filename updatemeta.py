@@ -6,6 +6,7 @@ import mbzMusic, shzMusic
 from mutagen.id3 import ID3, APIC, TCON, TCOP, TIT2, TALB, TPE1, TDRC, TRCK, TYER
 from mutagen.mp3 import MP3
 from pathlib import Path
+DEBUG=0
 
 musicbrainzngs.set_useragent(
     "c2f",
@@ -86,10 +87,17 @@ def EncodeMetadata():
 
 
 def s2i(stringname):
+    # String2Index
+    # One problem that I had was trying to tie metabrain and shazam database entries together.
+    # It wasn't uncommon for there to be differences in album and song titles with
+    # difference in capitilisation, spacing or different punctuation.
+    # Easiest way around this was to use a dictionary key with lower case
+    # and punctuation removed.
+
     stringname = stringname.lower()
     stringname = stringname.replace('’', '')
     stringname = stringname.replace("'", '')
-#    stringname = stringname.replace(" ", '')
+    stringname = stringname.replace(" ", '')
     return(stringname)
 
 def processFiles():
@@ -104,6 +112,7 @@ def processFiles():
     # For each song in the album as determined by musicbrainz, create a Song object
     # This is so we have a list of songs (and their attributes) that should be on an album
     for a in mbResults:
+#        print("Looping over mbResults. a is", a)
         mb = mbzMusic.Song(a['recording']['title'], config['Album'], config['Artist'], a['position'], a['recording']['length'])
         s = mb.getTitle()
         s = s2i(s)
@@ -112,7 +121,9 @@ def processFiles():
     # Loop over all mp3 files in CWD, and then use Shazam (songrec) to check the
     # attributes of the song
     position = 0
+#    print("Going to start looping")
     for f in glob.iglob('*.mp3'):
+#        print("Looping over all mp3 files -", f)
         exec = [ songrecexe, 'audio-file-to-recognized-song', f ]
         p = subprocess.check_output(exec, shell=False)
         shazamDS   = json.loads(p)
@@ -120,6 +131,7 @@ def processFiles():
         bgimage    = shazamDS['track']['images']['coverarthq']
         artist     = shazamDS['track']['subtitle']
         songtitle  = shazamDS['track']['title']
+#        print("Songtitle is", songtitle)
         if(len(shazamDS['track']['sections'][0]['metadata']) > 0):
             album      = shazamDS['track']['sections'][0]['metadata'][0]['text']
             year       = shazamDS['track']['sections'][0]['metadata'][2]['text']
@@ -133,14 +145,22 @@ def processFiles():
                 mbSong[songtitleindex].setBgImage(bgimage)
                 szSong[songtitleindex] = shzMusic.Song(songtitle, album, artist, genre, f)
                 szSong[songtitleindex].setPosition(position)
+            else:
+                print("error: I didn't find", songtitleindex, "in", mbSong.keys())
+
 
 
 #    return(szSong)
 
 def getTracklist(artist, album):
-    result = musicbrainzngs.search_releases(artist=artist, release=album)
+    result = musicbrainzngs.search_releases(artist=artist, release=album, format='CD')
     id = result["release-list"][0]["id"]
     new_result = musicbrainzngs.get_release_by_id(id, includes=["recordings"])
+    if (DEBUG == 1):
+        print("debug getTracklist:", result)
+        print("debug getTracklist id:", id)
+        print("debug get_release_by_id:", new_result)
+
     return(new_result["release"]["medium-list"][0]["track-list"])
 
 
