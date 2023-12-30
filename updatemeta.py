@@ -127,30 +127,32 @@ def processFiles():
         exec = [ songrecexe, 'audio-file-to-recognized-song', f ]
         p = subprocess.check_output(exec, shell=False)
         shazamDS   = json.loads(p)
-        genre      = shazamDS['track']['genres']['primary']
-        bgimage    = shazamDS['track']['images']['coverarthq']
-        artist     = shazamDS['track']['subtitle']
-        songtitle  = shazamDS['track']['title']
-#        print("Songtitle is", songtitle)
-        if(len(shazamDS['track']['sections'][0]['metadata']) > 0):
-            album      = shazamDS['track']['sections'][0]['metadata'][0]['text']
-            year       = shazamDS['track']['sections'][0]['metadata'][2]['text']
-            albumIndex = s2i(album)
-            if (albumIndex not in szAlbum):
-                szAlbum[albumIndex] = shzMusic.Album(album, artist, genre, year)
+        try:
+            genre      = shazamDS['track']['genres']['primary']
+            bgimage    = shazamDS['track']['images']['coverarthq']
+            artist     = shazamDS['track']['subtitle']
+#        print("debug: shazamDStrack is", shazamDS['track'])
+            songtitle  = shazamDS['track']['title']
+            print("songtitle is", songtitle)
+            if(len(shazamDS['track']['sections'][0]['metadata']) > 0):
+                album      = shazamDS['track']['sections'][0]['metadata'][0]['text']
+                year       = shazamDS['track']['sections'][0]['metadata'][2]['text']
+                albumIndex = s2i(album)
+                if (albumIndex not in szAlbum):
+                    szAlbum[albumIndex] = shzMusic.Album(album, artist, genre, year)
+        except KeyError:
+            print("weird. Incorrectly formed dictionary received from shazam;", shazamDS['track'])
 
-            songtitleindex = s2i(songtitle)
-            if(songtitleindex in mbSong.keys()):
-                position = mbSong[songtitleindex].getPosition()
-                mbSong[songtitleindex].setBgImage(bgimage)
-                szSong[songtitleindex] = shzMusic.Song(songtitle, album, artist, genre, f)
-                szSong[songtitleindex].setPosition(position)
-            else:
-                print("error: I didn't find", songtitleindex, "in", mbSong.keys())
+        songtitleindex = s2i(songtitle)
+        if(songtitleindex in mbSong.keys()):
+            position = mbSong[songtitleindex].getPosition()
+            mbSong[songtitleindex].setBgImage(bgimage)
+            szSong[songtitleindex] = shzMusic.Song(songtitle, album, artist, genre, f)
+            szSong[songtitleindex].setPosition(position)
+        else:
+            print("error: I didn't find", songtitleindex, "in", mbSong.keys())
 
 
-
-#    return(szSong)
 
 def getTracklist(artist, album):
     result = musicbrainzngs.search_releases(artist=artist, release=album, format='CD')
