@@ -1,5 +1,7 @@
-Cython
-json
-subprocess
-musicbrainzngs
-mutagen
+argcomplete>=2.0.0
+Cython>=3.0.6
+musicbrainzngs>=0.7.1
+mutagen>=1.46.0
+numpy>=1.26.2
+youtube-dl>=2021.12.17
+ShazamAPI>=0.0.2
