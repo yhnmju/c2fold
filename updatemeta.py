@@ -6,6 +6,7 @@ import mbzMusic, shzMusic
 from mutagen.id3 import ID3, APIC, TCON, TCOP, TIT2, TALB, TPE1, TDRC, TRCK, TYER
 from mutagen.mp3 import MP3
 from pathlib import Path
+from ShazamAPI import Shazam
 DEBUG=0
 
 musicbrainzngs.set_useragent(
@@ -19,14 +20,13 @@ config = {}
 mbSong = {}
 szSong = {}
 szAlbum = {}
-exe = {}
+#exe = {}
 
 def readConfig(file):
     with open(file) as fd:
         for line in fd:
             line = line.strip("\n")
             line = line.strip("\r")
-#            aaa = line.rstrip("\r\n")
             c = line.split(';')
             if (c[0] == 'Album'):
                 config['Album'] = c[1]
@@ -56,15 +56,16 @@ def EncodeMetadata():
         position = szSong[s].Position()
         filebg = mbSong[s].getBgImage()
         year  = szAlbum[AlbumIndex].Year
-        genre = szAlbum[AlbumIndex].Genre
+#        genre = szAlbum[AlbumIndex].Genre
+        genre = config['Genre']
 
-        print("debug3: album="+album, "Artist="+artist, "title="+title, "genre="+genre, "year="+year, "song position="+position)
+#        print("debug3: album="+album, "Artist="+artist, "title="+title, "genre="+genre, "year="+year, "song position="+position)
+        print("Updating", file, "(" + title + ")")
 
         r = requests.get(filebg)
         bgfile = open("cover.jpg", "wb")
         bgfile.write(r.content)
         bgfile.close()
-
 
         id3 = ID3(file)
         id3['TALB'] = TALB(encoding=3, text=album)
@@ -76,7 +77,6 @@ def EncodeMetadata():
 
 
         with open('cover.jpg', 'rb') as albumart:
-       #     print(albumart.read())
             id3['APIC'] = APIC(
                 encoding=3,
                 mime='image/jpeg',
@@ -103,16 +103,15 @@ def s2i(stringname):
 def processFiles():
     mbResults = getTracklist(config['Artist'], config['Album'])
     configFile = (str(Path.home()) + '/.config/c2f/c2f.cfg')
-    UtilConfig(configFile)
-    if("songrec" in exe ):
-        songrecexe = exe['songrec']
-    else:
-        songrecexe = "songrec"
+#    UtilConfig(configFile)
+#    if("songrec" in exe ):
+#        songrecexe = exe['songrec']
+#    else:
+#        songrecexe = "songrec"
 
     # For each song in the album as determined by musicbrainz, create a Song object
     # This is so we have a list of songs (and their attributes) that should be on an album
     for a in mbResults:
-#        print("Looping over mbResults. a is", a)
         mb = mbzMusic.Song(a['recording']['title'], config['Album'], config['Artist'], a['position'], a['recording']['length'])
         s = mb.getTitle()
         s = s2i(s)
@@ -121,19 +120,17 @@ def processFiles():
     # Loop over all mp3 files in CWD, and then use Shazam (songrec) to check the
     # attributes of the song
     position = 0
-#    print("Going to start looping")
     for f in glob.iglob('*.mp3'):
-#        print("Looping over all mp3 files -", f)
-        exec = [ songrecexe, 'audio-file-to-recognized-song', f ]
-        p = subprocess.check_output(exec, shell=False)
-        shazamDS   = json.loads(p)
+        openmp3file = open(f, 'rb').read()
+        shazam = Shazam(openmp3file)
+        rg = shazam.recognizeSong()
+        out = next(rg)
+        shazamDS = out[1]
         try:
             genre      = shazamDS['track']['genres']['primary']
             bgimage    = shazamDS['track']['images']['coverarthq']
             artist     = shazamDS['track']['subtitle']
-#        print("debug: shazamDStrack is", shazamDS['track'])
             songtitle  = shazamDS['track']['title']
-            print("songtitle is", songtitle)
             if(len(shazamDS['track']['sections'][0]['metadata']) > 0):
                 album      = shazamDS['track']['sections'][0]['metadata'][0]['text']
                 year       = shazamDS['track']['sections'][0]['metadata'][2]['text']
@@ -149,9 +146,6 @@ def processFiles():
             mbSong[songtitleindex].setBgImage(bgimage)
             szSong[songtitleindex] = shzMusic.Song(songtitle, album, artist, genre, f)
             szSong[songtitleindex].setPosition(position)
-        else:
-            print("error: I didn't find", songtitleindex, "in", mbSong.keys())
-
 
 
 def getTracklist(artist, album):
@@ -170,7 +164,6 @@ if(__name__ == "__main__"):
     try:
         readConfig(sys.argv[1])
         processFiles()
-#        print("s is", s)
         EncodeMetadata()
     except (KeyboardInterrupt, EOFError):
         print("\nExiting...")
